@@ -1,0 +1,371 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments::page_head('Customer | Orders')" />
+<body>
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="fragments::top_navigation('orders')" />
+	<div th:replace="fragments::main_navigation('orders')" />
+	<div class="ml-5 mr-5 mt-4 d-flex flex-grow-1">
+		<div class="row flex-grow-1">
+			<div th:replace="fragments::customer_menu('orders')"></div>
+			<div class="col pl-4">
+				<h2>Your Orders</h2>
+				<div class="alert alert-success" th:if="${message}">[[${message}]]</div>
+				<table class="table">
+					<thead class="thead-dark">
+						<tr>
+							<th>Id</th>
+							<th>Order Date</th>
+							<th>Order Details</th>
+							<th>Status</th>
+							<th class="d-none">Address</th>
+							<th>Options</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="order: ${orders}" th:class="${order.isVisited?'bg-visted order order-'+order.id:'order order-'+order.id}" >
+							<td>[[${order.id}]]</td>
+							<td class="order-date">
+								<div class="date-time">[[${#dates.format(order.created_date,"hh:mm a")}]]</div>
+								<div class="date-date">[[${#dates.format(order.created_date,"dd MMM, yyyy")}]]</div>
+								<small class="date-delivery badge badge-success">Expected: <span class="days">[[${order.expected_delivery_days==null?0:order.expected_delivery_days}]]</span> Days</small>
+							</td>
+							<td class="order-items" th:with="orderItems = ${order.orderItems}">
+								<p class="m-0 item" style="position:relative" th:each="orderItem, status : ${orderItems}"> 
+									<span>[[${status.count}]].</span>
+									<span>[[${orderItem.phone.title}]]</span>
+									<span style="float:right" class="text-secondary">
+										... x<span class="item-quantity">[[${orderItem.quantity}]]</span>
+										<span class="item-amount text-danger">[[${orderItem.amount}]]</span>
+									</span>
+								</p>
+								<hr class="m-1" />
+								<strong class="total-amount text-danger text-right d-block">[[${order.grandTotal}]]</strong>
+							</td>
+							<td class="text-center">
+								<!-- Payment Method -->
+								<div th:if="${order.paymentMethod=='COD'}" class="payment-method font-weight-bold">CASH ON DELIVERY</div>
+								<div th:if="${order.paymentMethod=='OP'}" class="payment-method font-weight-bold">ONLINE PAYMENT</div>
+								
+								<!-- Order Status -->
+								<div th:if="${order.status.toString()=='REQUESTED'}" class="status badge badge-primary">[[${order.status}]]</div>
+								<div th:if="${order.status.toString()=='APPROVED'}" class="status badge badge-warning">[[${order.status}]]</div>
+								<div th:if="${order.status.toString()=='SHIPPED'}" class="status badge badge-info">[[${order.status}]]</div>
+								<div th:if="${order.status.toString()=='REJECTED'}" class="status badge badge-danger">[[${order.status}]]</div>
+								<div th:if="${order.status.toString()=='DELIVERED'}" class="status badge badge-success">[[${order.status}]]</div>
+								
+								<div class="payment-status">
+									<!-- CASH ON DELIVERY -->
+									<span th:if="${(order.paymentMethod=='COD' && order.status.toString()=='DELIVERED')}" class="pay-status badge badge-success">PAID</span>
+									<span th:if="${order.paymentMethod=='COD' && order.status.toString()!='DELIVERED'}" class="pay-status badge badge-secondary">NOT PAID</span>
+									
+									<!-- ONLINE -->
+									<span th:if="${(order.paymentMethod=='OP' && order.payments.size()>0) 
+										&& order.payments.get(0).status.toString=='PENDING'}" class="pay-status badge badge-info">PENDING</span>
+									<span th:if="${(order.paymentMethod=='OP' && order.payments.size()>0) 
+										&& order.payments.get(0).status.toString=='PAID'}" class="pay-status badge badge-success">PAID</span>
+									<span th:if="${order.paymentMethod=='OP' && order.payments.isEmpty}" class="badge badge-secondary">NOT PAID</span>
+								</div>
+							</td>
+							<td class="address d-none" th:with="adr = ${order.address}" th:utext="${adr.full_name+'<br>'+adr.address_line_1+
+								', '+adr.address_line_2+'<br>'+adr.city+' '+adr.state+', '+adr.country+'-'+adr.zip}"></td>
+							<td>
+								<span th:if="${order.status.toString != 'REJECTED' && 
+									!(order.paymentMethod=='OP' && !order.payments.isEmpty && order.payments.get(0).status.toString == 'PAID')}">
+									<a class="pay-btn" th:data-orderid="${order.id}"
+										th:data-id="${(!order.payments.isEmpty && order.payments.size()&gt;=0)?order.payments.get(0).razorOrderId:''}"
+										th:data-amount="${order.grandTotal}"
+										th:data-username="${order.address.full_name}"
+										th:data-email="${user.email}"
+										th:data-phone="${order.address.phone}"
+										 href="#">Pay</a> | 
+								 </span>
+								<a class="view-btn" th:data-id="${order.id}" href="#">view</a>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+
+			</div>
+		</div>
+	</div>
+	<div class="mt-auto">
+		<footer th:replace="fragments::footer()" />
+	</div>
+</div>
+
+<div id="orderdetailwindow" class="modal" tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header bg-dark text-light">
+				<h3 class="modal-title">Order Details</h3>
+				<button type="button" class="close text-light" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="order-date d-flex mb-3 justify-content-between h5"></div>
+				<div class="order-items">
+					<div class="order-item">
+						<div class="row">
+							<div class="col-md-3">
+								<div class="confirm process">
+									<div class="tracking">REQUESTED</div>
+									<div class="tracking">APPROVED</div>
+									<div class="tracking">SHIPPED</div>
+									<div class="tracking">DELIVERED</div>								
+								</div>
+								<div class="confirm reject">
+									<div class="tracking">REJECTED</div>
+								</div>
+							</div>
+							<div class="col-md-1">
+								<div class="order-mark-join odr-1 mark"><span class="cborder"></span></div>
+								<div class="order-mark-join odr-2 mark"><span class="cborder"></span></div>
+								<div class="order-mark-join odr-3 mark"><span class="cborder"></span></div>
+								<div class="order-mark odr-4 mark" ></div>
+							</div>
+							<div class="col">
+								<div class="bg-light text-dark card mb-2 p-2 text-center">
+									<strong>Your Order Status:</strong>
+									<span class="status"></span>
+									<span class="pay-status"></span>
+								</div>
+								<div class="mb-3 order-cancel">
+									<a class="btn btn-primary" href="#">Cancel Order</a>
+									<small class="text-primary">You can cancel the order before approval.</small>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer d-flex">
+				<div class="flex-grow-1">
+					<h4>Shipping Details</h4>
+					<address class="address">
+						Sorabh <br />
+						D23D, D block Janakpuri, Shalimar Garden Sahibabad Ghaziabad Uttar Pradesh-201005, India
+					</address>
+				</div>
+				<div class="flex-grow-1">
+					<h4>Price Details</h4>
+					<div class="items h5">
+						<div class="item">
+							1. UIGO Mobile ... x1   <span class="ml-auto" style="float:right">Rs 24,000</span> <br />
+							Base price ... x1   Rs 20,000 <br /> Tax Rs 4,000
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="ordercancelwindow" class="modal" tabindex="-1" role="dialog">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header bg-dark text-light">
+				<h3>Cancel Order</h3>
+				<button type="button" class="close text-light" data-dismiss="modal"
+					aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				Are you sure? <br> Your Order will be deleted permanently.
+			</div>
+			<div class="modal-footer">
+				<a class="delete-btn btn btn-primary mr-3">Yes</a>
+				<button type="button" data-dismiss="modal" class="btn btn-secondary">No</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="paymentStatusWindow" class="modal fade show" aria-modal="true" role="dialog">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header text-light bg-dark">
+				<h5 class="modal-title">Order Status</h5>
+				<button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+		          <span aria-hidden="true">&times;</span>
+		        </button>
+			</div>
+			<div class="modal-body">
+				<div class="success icon text-center">
+					<span class="fa fa-check-circle fa-3x text-success"></span>
+				</div>
+				<div class="failure icon text-center">
+					<span class="fa fa-times-circle fa-3x text-danger"></span>
+				</div>
+				<div class="message text-center h4 mt-3 font-weight-bold border border-success p-3"></div>
+			</div>
+			<div class="modal-footer border-0 text-center pt-0 pb-4">
+				<button class="ok-btn btn btn-primary pl-4 pr-4 font-weight-bold m-auto">OK</button>
+			</div>
+		</div>
+	</div>
+</div>
+	
+<div id="loading">
+	<div class="spinner-border text-light"
+		style="position: fixed; left: 50%; top: 50%">
+		<span class="sr-only">Loading...</span>
+	</div>
+</div>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script src="/js/payment-razorpay.js"></script>
+<script type="text/JavaScript" th:src="@{/js/jQuery.print.js}"></script>
+<script>
+// RETRY RAZOR PAYMENT
+$(".pay-btn").on("click", function(){
+	var $this = $(this),
+		orderId = $this.data("orderid"),
+		razorOrderId = $this.data("id"),
+		amount = $this.data("amount"),
+		username = $this.data("username"),
+		email = $this.data("email"),
+		phone = $this.data("phone");
+	
+	console.log(orderId, razorOrderId, amount, username, email, phone);
+	if(!razorOrderId || razorOrderId == '') {
+		// create razor order from server
+		$.ajax({
+			url: '/cart/payment',
+			type: 'post',
+			data:{
+				id: orderId,
+				amount: amount
+			},
+			dataType:'json',
+			beforeSend: function(){
+		        $('#loading').show();
+		    }, success: function(d) {
+		    	console.log('success', d);
+		    	// proced payment to razor order
+				createRazorPaymentWindow({
+					id: d.id,
+					amount: d.amount,
+					username: d.username,
+					email: d.email,
+					phone: d.phone
+				});
+			}, error: function(e) {
+				console.log('error', e)
+			}, complete: function(){
+		        $('#loading').hide();
+		    }
+		})
+		console.log("create razor order based on order");
+	} else {
+		// proced payment to razor order
+		createRazorPaymentWindow({
+			id: razorOrderId,
+			amount: amount,
+			username: username,
+			email: email,
+			phone: phone
+		});
+	}
+	return false;
+});
+
+
+//Show order details
+var $orderdetailwindow = $("#orderdetailwindow"),
+	$ordercancelwindow = $("#ordercancelwindow"),
+	$orderinvoicewindow = $("#orderinvoicewindow");
+
+window.so = window.so || {};
+	
+$(".view-btn").on("click", function() {
+	var $this = $(this),
+		$parent = $this.parent().parent(),
+		id = $this.data('id');
+	
+	so.address = $parent.find(".address").html();
+	so.status = $parent.find(".status").html();
+	so.paymentMethod = $parent.find(".payment-method").html();
+	so.paymentStatus = $parent.find(".payment-status").html();
+	so.orderItems = $parent.find(".order-items").html();
+	so.orderDate = $parent.find(".order-date").html();
+	
+	// get current date compare with calculated date after 15 days on order;
+	var todayDate = new Date();
+	var orderDate = new Date($parent.find(".order-date .date-date").html());
+	orderDate.setDate(orderDate.getDate()+15);
+	
+	$orderdetailwindow.find(".confirm").hide();
+	
+	var $orderCancel = $orderdetailwindow.find(".order-cancel").hide(),
+		$orderInvoice = $orderdetailwindow.find(".order-invoice").hide();
+	
+	var $mark = $orderdetailwindow.find(".mark");
+	if(so.status.trim() == "REJECTED") {
+		$orderdetailwindow.find(".confirm.process").hide();
+		$orderdetailwindow.find(".confirm.reject").show();
+		$mark.hide();
+		$orderdetailwindow.find(".odr-4").addClass("active").show();
+	} else {
+		$orderdetailwindow.find(".confirm.process").show();
+		$orderdetailwindow.find(".confirm.reject").hide();
+		$orderdetailwindow.find(".mark").removeClass("active");
+		$mark.show();
+		
+		if(so.status.trim() == "REQUESTED") {
+			$orderdetailwindow.find(".odr-1").addClass("active");
+			$orderCancel.show();
+		} else if(so.status.trim() == "APPROVED") {
+			$orderdetailwindow.find(".odr-1").addClass("active");
+			$orderdetailwindow.find(".odr-2").addClass("active");
+		} else if(so.status.trim() == "SHIPPED") {
+			$orderdetailwindow.find(".odr-1").addClass("active");
+			$orderdetailwindow.find(".odr-2").addClass("active");
+			$orderdetailwindow.find(".odr-3").addClass("active");
+			
+		} else if(so.status.trim().search("DELIVERED") != -1) {
+			$orderdetailwindow.find(".odr-1").addClass("active");
+			$orderdetailwindow.find(".odr-2").addClass("active");
+			$orderdetailwindow.find(".odr-3").addClass("active");
+			$orderdetailwindow.find(".odr-4").addClass("active");
+
+			$orderInvoice.show();
+		}
+	}
+	
+	$orderdetailwindow.find(".order-date").html(so.orderDate);
+	$orderdetailwindow.find(".address").html(so.address);
+	$orderdetailwindow.find(".items").html(so.orderItems);
+	$orderdetailwindow.find(".status").html(so.status+", "+so.paymentStatus+", "+so.paymentMethod);	
+	$orderdetailwindow.data("id", id);
+	$orderdetailwindow.modal();
+	
+	if($orderCancel.is(":visible")) {
+		$orderCancel.find(".btn").one('click', function(){
+			$orderdetailwindow.modal("hide");
+			
+			$ordercancelwindow.data("id", id);
+			$ordercancelwindow.modal();
+			console.log("clicked cancel order");
+			return false;
+		});
+	}
+	
+	return false;
+});
+
+/* CANCEL ORDER REQUESTED */
+$ordercancelwindow.find(".delete-btn").on("click", function(){
+	var id = $ordercancelwindow.data("id");
+	window.location.href = "/customer/orders/{id}/delete";
+	console.log("order_id "+id);
+	return false;
+});
+
+
+</script>
+</body>
+</html>

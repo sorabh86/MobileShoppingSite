@@ -1,0 +1,58 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments :: admin_head('Admin | Phones')" />
+<body>
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="admin/fragments::admin_navigation()" />
+	<div class="container">
+		
+		<h2 class="border-bottom pb-3 mb-4">Admin | Phones <a class="btn btn-primary" th:href="@{/admin/phones/new}">Add Phone</a></h2>
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Id</th>
+					<th>Image</th>
+					<th>Title</th>
+					<th>Price</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="phone : ${phones}">
+					<td>[[${phone.id}]]</td>
+					<td>
+						<img th:src="${phone.imagePath}" height="60" />
+					</td>
+					<td>[[${phone.title}]]</td>
+					<td>[[${#numbers.formatDecimal(phone.price, 0, 'COMMA', 2, 'POINT')}]]</td>
+					<td>
+						<a th:href="@{'/admin/phones/'+${phone.id}+'/edit'}">Edit</a> | 
+						<a class="delete-btn text-danger" th:data-href="@{'/admin/phones/'+${phone.id}+'/delete'}" href="#">Delete</a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div class="mt-auto">
+		<footer th:replace="fragments::footer()" />
+	</div>
+</div>
+
+<div th:replace="admin/fragments::confirmWindow()"></div>
+<script>
+	var $confirmWindow = $("#confirm-window");
+	$(".delete-btn").on("click", function() {
+		var href = $(this).data("href");
+		$confirmWindow.data("href", href);
+		$confirmWindow.modal();
+		return false;
+	});
+	$confirmWindow.find(".yes-btn").on("click", function(){
+		var href = $confirmWindow.data("href");
+		window.location.href = href;
+	});
+</script>
+
+
+</body>
+</html>

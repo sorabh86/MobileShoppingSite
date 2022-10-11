@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" 
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head th:fragment="page_head(title)">
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
+	<title>[[${title}]]</title>
+	
+	<link rel="stylesheet" th:href="@{/bootstrap/4.6.1/css/bootstrap.min.css}" />
+	<link rel="stylesheet" th:href="@{/css/all.css}" />
+	<link rel="stylesheet" th:href="@{/css/style.css}" />
+	
+	<script th:src="@{/js/jquery.js}" /></script>
+	<script th:src="@{/bootstrap/4.6.1/js/bootstrap.bundle.min.js}" /></script>
+</head>
+<body>
+	<div th:fragment="top_navigation(page)" id="nav-top" class="navbar navbar-dark bg-dark navbar-expand-lg text-light p-0">
+        <!-- <div class="container"> -->
+            <a class="navbar-brand ml-3 mr-auto nav-link">MOBILE PHONE SHOPPING SYSTEM</a>
+            <div class="navbar-nav mr-4">
+	            <button class="navbar-toggler m-2" type="button" data-toggle="collapse" data-target="#auth_div" aria-controls="auth_div" aria-expanded="false" aria-label="Toggle navigation">
+				    <span class="fa fa-user"></span>
+				</button>
+	            <div class="collapse navbar-collapse" id="auth_div">
+	                <li sec:authorize="isAnonymous()" th:class="${(page=='login')?'navbar-item active':'navbar-item'}">
+	                	<a class="nav-link" th:href="@{/login}">login</a>
+	               	</li>
+	               	<li sec:authorize="isAuthenticated()" class="navbar-item dropdown">
+	            		<a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+	            			<span sec:authentication="name"></span>
+	                	</a>
+	                	<div class="dropdown-menu">
+	                		<a sec:authorize="hasRole('ADMIN')" class="dropdown-item" th:href="@{/admin}">Admin Dashboard</a>
+	                		<a sec:authorize="hasRole('CUSTOMER')" class="dropdown-item" th:href="@{/customer}">Profile</a>
+		                	<form th:action="@{/logout}" method="post">
+						    	<button class="dropdown-item" type="submit"> Logout</button>
+						    </form>
+	                	</div>
+	            	</li>
+	                <li th:class="${(page=='register')?'navbar-item active':'navbar-item'}">
+	                	<a class="nav-link" th:href="@{/register}">register</a>
+	               	</li>
+	            </div>
+            </div>
+            
+            <a class="nav-link text-light btn btn-danger mr-3" th:href="@{/cart}">
+                <span class="fas fa-shopping-cart"></span> cart
+            </a>
+        <!-- </div> -->
+    </div>
+]
+	<nav th:fragment="main_navigation(page)" id="nav-main" class="navbar navbar-expand-lg navbar-light bg-light border">
+		<div class="container-fluid">
+			<a th:href="@{/}" class="navbar-brand">
+				<img th:src="@{/images/logo-sm.png}" alt="logo" />
+			</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+			    <span class="navbar-toggler-icon"></span>
+			</button>
+						
+			<div class="collapse navbar-collapse"  id="navbarSupportedContent">
+				<ul class="navbar-nav ml-4 mr-auto">
+					<li th:class="${(page=='home')?'navbar-item active':'navbar-item'}">
+                        <a class="nav-link" th:href="@{/}">home</a>
+                    </li>
+                    <li th:class="${(page=='about')?'navbar-item active':'navbar-item'}">
+                    	<a class="nav-link" th:href="@{/about}">about</a>
+                   	</li>
+                    <li th:class="${(page=='phone')?'navbar-item active':'navbar-item'}">
+                    	<a class="nav-link" th:href="@{/phones}">phones</a>
+                   	</li>
+                    <li th:class="${(page=='contact')?'navbar-item active':'navbar-item'}">
+                    	<a class="nav-link" th:href="@{/contact}">contact</a>
+                   	</li>
+				</ul>
+				<!-- <form class="form-inline text-right" th:action="@{/<phones></phones>}" method="post">
+                    <div class="form-group ml-auto m-2">
+                        <input type="text" class="form-control mr-2" name="search-btn" placeholder="Search Phone..." required />
+                        <button class="btn btn-danger" type="submit">
+                            <span class="fas fa-search"></span>
+                        </button>
+                    </div>
+                </form> -->
+			</div>
+		</div>
+	</nav>
+	
+	<div th:fragment="customer_menu(page)" class="col-lg-2 text-center bg-blue rounded p-4">
+		<a th:class="${page=='profile'?'nav-link text-white bg-danger rounded':'nav-link text-white rounded'}" th:href="@{/customer/profile}">User Profile</a>
+		<a th:class="${page=='address'?'nav-link text-white bg-danger rounded':'nav-link text-white rounded'}" th:href="@{/customer/address}">Address</a> 
+		<a th:class="${page=='orders'?'nav-link text-white bg-danger rounded':'nav-link text-white rounded'}" th:href="@{/customer/orders}">Orders</a>
+		<a th:class="${page=='return'?'nav-link text-white bg-danger rounded':'nav-link text-white rounded'}" th:href="@{/customer/return}">Return Order</a>
+		<a th:class="${page=='invoices'?'nav-link text-white bg-danger rounded':'nav-link text-white rounded'}" th:href="@{/customer/invoices}">Download Invoices</a>
+		<a th:class="${page=='feedback'?'nav-link text-white bg-danger rounded':'nav-link text-white rounded'}" th:href="@{/customer/feedback}">Feedback &amp; Rating</a> 
+		<a th:class="${page=='chats'?'nav-link text-white bg-danger rounded':'nav-link text-white rounded'}" th:href="@{/customer/chats}">Chats</a> 
+	</div>
+	
+	<footer th:fragment="footer()" class="footer mt-4 bg-dark text-light p-2">
+        <div class="container text-center">
+            <p class="m-0">&copy; Copyright to sorabh86.github.io, All Right Reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

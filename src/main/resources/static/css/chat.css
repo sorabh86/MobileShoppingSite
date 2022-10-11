@@ -1,0 +1,111 @@
+.chat-box{
+  box-shadow:0 2.8px 2.2px rgba(0, 0, 0, 0.034),0 6.7px 5.3px rgba(0, 0, 0, 0.048),0 12.5px 10px rgba(0, 0, 0, 0.06),0 22.3px 17.9px rgba(0, 0, 0, 0.072),0 41.8px 33.4px rgba(0, 0, 0, 0.086),0 100px 80px rgba(0, 0, 0, 0.12);
+  height: 600px;
+}
+
+.member-list{
+  width: 20%;
+}
+
+ul {
+  padding: 0;
+  list-style-type: none;
+}
+.member-content{overflow-y: auto;}
+.member{
+	display: flex;
+    align-items: center;
+	position:relative;
+	text-transform: uppercase;
+    font-weight: bold;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 40px;
+    padding: 10px 20px;
+    cursor: pointer;
+    box-shadow: 0 8px 8px -4px lightblue;
+}
+.member.active{
+  background: #007bff;
+  color:#fff;
+}
+.member:hover{
+  background: #0069d9;
+  color:#fff;
+}
+.chat-status {
+	position:absolute;
+	left: 50%;
+    top: 8px;
+    transform: translate(-50%, -100%);
+    box-shadow: 0 0 8px rgb(0 0 0 / 50%);
+}
+.user-status {
+    display: inline-block;
+    margin-left: auto;
+    width: 20px;
+    height: 20px;
+}
+
+.chat-content {
+	display:none;
+}
+.chat-content.active{
+	display:flex;
+	flex-direction:column;
+	flex-grow:1;
+}
+.chat-messages{overflow-y: scroll;}
+
+.avatar{
+	position: relative;
+	text-align:center;
+	font-weight: bold;
+	background-color: cornflowerblue;
+	padding: 3px 5px;
+	border-radius: 5px;
+	color:#fff;
+}
+.avatar:after {
+    content: "";
+    position: absolute;
+    border-right: none;
+    border-left: 10px solid cornflowerblue;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    left: 100%;
+    top: 5px;
+}
+.avatar.self{
+  color:#000;
+  background-color: greenyellow;
+}
+.avatar.self:after {
+	content: "";
+    position: absolute;
+    border-left: none;
+    border-right: 10px solid greenyellow;
+    left: 0;
+    top: 5px;
+    transform: translate(-100%, 0);
+}
+.input-message {border-radius: 50px 0 0 50px!important;padding-left:25px}
+.send-button{border-radius: 0 50px 50px 0!important;padding-right:25px}
+.message{
+	padding: 5px;
+	width: auto;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	margin: 5px 10px;
+}
+.message-data{
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin: 0 15px;
+    box-shadow: 0 3px 10px rgb(0 0 0 / 20%);
+}
+.message.self{
+  justify-content: end;
+}

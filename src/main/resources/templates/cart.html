@@ -1,0 +1,283 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments::page_head('Shopping Cart')" />
+<body>
+	<div class="d-flex flex-column" style="min-height: 100vh">
+		<div th:replace="fragments::top_navigation(${page})" />
+		<div th:replace="fragments::main_navigation(${page})" />
+
+		<div class="container mt-4 mb-4">
+			<h2 class="d-flex mb-3">
+				Your Shopping Cart <span th:if="${!cartItems.isEmpty()}"
+					class="text-danger ml-auto">Total: <span class="total-price">[[${totalPrice}]]</span>
+				</span>
+			</h2>
+			<div class="row">
+				<form id="checkout_form" name="checkout_form"
+					th:action="@{/checkout}" method="post" class="col">
+					<!-- 					<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/> -->
+					<div th:if="${cartItems.isEmpty()}" class="alert alert-warning">
+						Your Shopping Cart is Empty!!! <a th:href="@{/phones}">Go for
+							Shopping</a>
+					</div>
+
+					<div th:if="${!cartItems.isEmpty()}" class="d-flex flex-column">
+						<div class="cart-list mb-4">
+							<th:block th:each="item, status : ${cartItems}">
+								<div class="cart-item row border rounded m-2 p-2">
+									<div class="d-sm-none d-md-flex col-1 m-auto">
+										<strong class="text-dark">[[${status.count}]]</strong>
+									</div>
+									<div class="col-2 m-auto d-flex cart-item-img">
+										<img th:src="@{${item.phone.imagePath}}"
+											class="img-responsive m-auto" alt="Phone Image" />
+									</div>
+									<div class="col mt-auto mb-auto">
+										<a th:href="@{${'/phones/'+item.phone.id}}">[[${item.phone.title}]]</a>
+									</div>
+									<div class="col-lg-2 m-auto">
+										<div style="max-width: 180px">
+											<input class="item_id" type="hidden"
+												th:name="${'cartItems['+status.count+'].item_id'}"
+												th:value="${item.id}" /> <input class="phone_id"
+												type="hidden"
+												th:name="${'cartItems['+status.count+'].phone_id'}"
+												th:value="${item.phone.id}" /> <input class="amount"
+												type="hidden"
+												th:name="${'cartItems['+status.count+'].amount'}"
+												th:value="${item.phone.price}" /> <input
+												class="text-center touch-spin quantity" type="text"
+												th:name="${'cartItems['+status.count+'].quantity'}"
+												th:value="${item.quantity}"
+												data-bts-button-down-class="btn btn-secondary rounded-0"
+												data-bts-button-up-class="btn btn-secondary rounded-0" />
+										</div>
+									</div>
+									<div class="col m-auto">
+										X <span class="price">[[${item.phone.price}]]</span> <strong
+											class="d-block text-danger">#Sub-Total: <span
+											class="subtotal-price">[[${item.phone.price*item.quantity}]]</span>
+										</strong>
+									</div>
+									<div class="col-lg-1 m-auto text-right">
+										<a th:href="@{${'/removetocart/'+item.phone.id}}"
+											class="remove btn btn-light text-dark p-2"> <span
+											class="fa fa-trash"></span>
+										</a>
+									</div>
+								</div>
+							</th:block>
+						</div>
+
+						<div class="address-list row">
+							<div class="col">
+								<h4>Choose Delivery Address</h4>
+								<th:block th:each="address, status : ${addresses}">
+									<div class="card d-block m-2 p-3">
+										<label class="d-flex"> <input class="mt-auto mb-auto"
+											type="radio" name="address_id" th:value="${address.id}" />
+										</td> <span class="ml-3"> <span class="full_name">[[${address.full_name}]]</span>
+												<span class="address_line_1">[[${address.address_line_1}]]</span>
+												<span class="address_line_2">[[${address.address_line_2}]]</span>
+												<span class="city">[[${address.city}]]</span> <span
+												class="state">[[${address.state}]]</span> <span
+												class="country">[[${address.country}]]</span> <span
+												class="zip">[[${address.zip}]]</span>
+										</span>
+										</label>
+									</div>
+								</th:block>
+								<div class="card d-block m-2 p-3">
+									<label class="d-flex"> <input
+										class="mt-auto mb-auto new_address" type="radio"
+										name="address_id" value="0" checked />
+									</td> <span class="ml-3 d-inline-block">Fill up new Address</span>
+									</label>
+								</div>
+
+								<div class="your-message ml-2 mr-2 mt-4">
+									<h4>Your Message</h4>
+									<textarea name="message" id="" cols="30" rows="10"
+										class="form-control"></textarea>
+								</div>
+							</div>
+							<div id="address-form"
+								class="col-lg border p-3 rounded mt-3 ml-4 mr-4">
+								<h4>Fill up Address Details:</h4>
+								<div class="form-group">
+									<label>Full Name: </label> <input name="full_name"
+										class="form-control" type="text" placeholder="Your Full Name"
+										required />
+								</div>
+								<div class="form-group">
+									<label>phone:</label> <input name="phone" class="form-control"
+										type="text" placeholder="Address Line 1" required />
+								</div>
+								<div class="form-group">
+									<label>Address Line 1:</label> <input name="address_line_1"
+										class="form-control" type="text" placeholder="Address Line 1"
+										required />
+								</div>
+								<div class="form-group">
+									<label>Address Line 2:</label> <input name="address_line_2"
+										class="form-control" type="text" placeholder="Address Line 2" />
+								</div>
+								<div class="form-group">
+									<label>City:</label> <input name="city" class="form-control"
+										type="text" placeholder="Your City" required />
+								</div>
+								<div class="form-group">
+									<label>State:</label> <input name="state" class="form-control"
+										type="text" placeholder="Your State" required />
+								</div>
+								<div class="form-group">
+									<label>Country:</label> <input name="country"
+										class="form-control" type="text" placeholder="Your Country"
+										required />
+								</div>
+								<div class="form-group">
+									<label>Zip Code:</label> <input name="zip" class="form-control"
+										type="text" placeholder="Zip Code" required />
+								</div>
+							</div>
+						</div>
+
+						<div class="payment-options ml-2 mr-2 mt-4 border p-4 row">
+							<div class="col">
+								<h4>Choose Payment Method:</h4>
+								<label class="d-block"> <input type="radio"
+									name="payment-method" value="COD" checked /> Cash on Delivery
+								</label> <label class="d-block"> <input type="radio"
+									name="payment-method" value="OP" /> Online Payment
+								</label>
+							</div>
+							<div class="col text-right">
+								<button type="submit" class="btn btn-danger ml-auto">Checkout/Payment</button>
+							</div>
+						</div>
+
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="mt-auto">
+			<footer th:replace="fragments::footer()" />
+		</div>
+	</div>
+
+	<div id="paymentStatusWindow" class="modal fade show" aria-modal="true" role="dialog">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content">
+				<div class="modal-header text-light bg-dark">
+					<h5 class="modal-title">Order Status</h5>
+					<button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+			          <span aria-hidden="true">&times;</span>
+			        </button>
+				</div>
+				<div class="modal-body">
+					<div class="success icon text-center">
+						<span class="fa fa-check-circle fa-3x text-success"></span>
+					</div>
+					<div class="failure icon text-center">
+						<span class="fa fa-times-circle fa-3x text-danger"></span>
+					</div>
+					<div class="message text-center h4 mt-3 font-weight-bold border border-success p-3"></div>
+				</div>
+				<div class="modal-footer border-0 text-center pt-0 pb-4">
+					<button class="ok-btn btn btn-primary pl-4 pr-4 font-weight-bold m-auto">OK</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="loading">
+		<div class="spinner-border text-light"
+			style="position: fixed; left: 50%; top: 50%">
+			<span class="sr-only">Loading...</span>
+		</div>
+	</div>
+
+	<link rel="stylesheet" href="/css/jquery.bootstrap-touchspin.min.css" />
+	<script src="/js/jquery.bootstrap-touchspin.min.js"></script>
+	<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+	<script src="/js/payment-razorpay.js"></script>
+
+	<script>
+		/** UPDATE TOTAL PRICE **/
+		var $cartItems = $(".cart-item"), $totalPrice = $(".total-price");
+		function updatePrice() {
+			var totalPrice = 0;
+			for (var i = 0; i < $cartItems.length; i++) {
+				var $cartItem = $($cartItems[i]);
+				var amount = $cartItem.find(".amount").val();
+				var quantity = $cartItem.find(".quantity").val();
+				totalPrice += (amount * quantity);
+			}
+			$totalPrice.html(totalPrice);
+		}
+
+		var $touchInput = $("input.touch-spin");
+		$touchInput.TouchSpin({
+			min : 1,
+			max : 10
+		});
+
+		$touchInput.change(function() {
+			var $this = $(this), $parent = $this.parent().parent()
+			item_id = $parent.find(".item_id").val(), quantity = $(this).val();
+
+			$.post({
+				url : "/cart/update",
+				method : "post",
+				data : {
+					_csrf : $("input[name='_csrf']").val(),
+					item_id : item_id,
+					quantity : quantity
+				},
+				success : function(data) {
+					console.log(data);
+				}.bind(this),
+				error : function(error) {
+					console.error(error);
+				}.bind(this)
+			})
+			updatePrice();
+		});
+
+		$(function() {
+			var $addressForm = $("#address-form");
+			var addressFormChild = $addressForm.html();
+
+			$("input[name='address_id']").on("change", function() {
+				var $this = $(this), value = $this.val();
+
+				if (value == "0") {
+					$addressForm.show();
+					$addressForm.html(addressFormChild);
+				} else {
+					$addressForm.hide();
+					$addressForm.empty();
+				}
+			});
+		});
+
+		// IF Online payment mode selected then start ajax payment
+		var $checkoutForm = $("#checkout_form");
+		$checkoutForm.on("submit", function() {
+			var paymentMethod = document.forms.checkout_form['payment-method'].value;
+	
+			if (paymentMethod == 'OP') {
+				// convert form data to json
+				var checkoutForm = document.forms.checkout_form;
+				var formData = new FormData(checkoutForm);
+				var jsonData = Object.fromEntries(formData.entries());
+				jsonData.amount = $totalPrice.html();
+				console.log("form data:", jsonData);
+				startPayment(jsonData);
+	
+				return false;
+			}
+		});
+	</script>
+</body>
+</html>

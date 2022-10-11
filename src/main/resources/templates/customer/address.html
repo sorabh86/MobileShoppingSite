@@ -1,0 +1,88 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments :: page_head('Customer | Address')" />
+<body>
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="fragments::top_navigation('customer')" />
+	<div th:replace="fragments::main_navigation('customer')" />
+	<div class="ml-5 mr-5 mt-4 d-flex flex-grow-1">
+		<div class="row flex-grow-1">
+			<div th:replace="fragments::customer_menu('address')"></div>
+			<div class="col">
+				<div th:if="${message!=null}" class="alert alert-success">
+					[[${message}]]
+				</div>
+				<div th:if="${error!=null}" class="alert alert-success">
+					[[${error}]]
+				</div>
+				<h3 class="border-bottom mb-4 pb-3">Customer Addresses					
+					<a class="btn btn-primary" th:href="@{${'/customer/address/new'}}">Add Address</a>
+				</h3>
+				<div th:if="${addresses==null}" class="alert alert-info">[[${addresses}]] No Record found.</div>
+				<table th:if="${addresses}" class="table">
+					<thead>
+						<tr>
+							<th>Id</th>
+							<th>Full Name</th>
+							<th>Phone</th>
+							<th>Address</th>
+							<th></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="address : ${addresses}">
+							<td>[[${address.id}]]</td>
+							<td>[[${address.full_name}]]</td>
+							<td>[[${address.phone}]]</td>
+							<td>[[${address.address_line_1}]], [[${address.address_line_2}]], [[${address.city}]], [[${address.state}]], [[${address.country}]]-[[${address.zip}]]</td>
+							<td>
+								<a th:href="@{'/customer/address/'+${address.id}+'/edit'}">Edit</a> | 
+								<a class="delete-btn text-danger" th:data-href="@{'/customer/address/'+${address.id}+'/delete'}" href="#">Delete</a>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>	
+	</div>
+	
+	<div class="mt-auto">
+		<footer th:replace="fragments::footer()" />
+	</div>
+</div>
+
+	<div id="confirm-window" class="modal fade">
+	  <div class="modal-dialog modal-dialog-centered">
+	    <div class="modal-content">
+	      <div class="modal-header bg-dark text-light">
+	        <h4 class="modal-title">Confirm Action</h4>
+	        <button type="button" class="close text-light" data-dismiss="modal">
+	        	<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+        	</button>
+	      </div>
+	      <div class="modal-body">
+				Are you Sure? <br /> Address will be removed permanently.
+	      </div>
+	      <div class="modal-footer border-0 row p-0 pb-3 ml-3 mr-3 ">
+	        <button type="button" class="yes-btn btn btn-primary col">Yes</button>
+	        <button type="button" class="btn btn-secondary col" data-dismiss="modal">No</button>
+	      </div>
+	    </div><!-- /.modal-content -->
+	  </div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+	
+	<script>
+		var $confirmWindow = $("#confirm-window");
+		$(".delete-btn").on("click", function() {
+			var href = $(this).data("href");
+			$confirmWindow.data("href", href);
+			$confirmWindow.modal();
+			return false;
+		});
+		$confirmWindow.find(".yes-btn").on("click", function(){
+			var href = $confirmWindow.data("href");
+			window.location.href = href;
+		});
+	</script>
+</body>
+</html>

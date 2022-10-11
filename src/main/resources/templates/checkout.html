@@ -1,0 +1,20 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments::page_head('Checkout')" />
+<body>
+	<div th:replace="fragments::top_navigation('')" />
+	<div th:replace="fragments::main_navigation('')" />
+	<div class="container mt-4">
+		
+		<h2 class="mb-3">Checkout</h2>
+		<div class="row">
+			[[${data.toString()}]]		
+		</div>
+	</div>
+	<link rel="stylesheet" href="/css/jquery.bootstrap-touchspin.min.css" />
+	<script src="/js/jquery.bootstrap-touchspin.min.js"></script>
+	<script>
+		$("input[name='quantity']").TouchSpin();
+	</script>
+</body>
+</html>

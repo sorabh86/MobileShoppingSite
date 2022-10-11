@@ -1,0 +1,19 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments::page_head('Verification')" />
+<body>
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="fragments::top_navigation(${page})" />
+	<div th:replace="fragments::main_navigation(${page})" />
+	<div class="container">
+		<h2 class="border-bottom mt-4 pb-3 mb-3">Account Verification</h2>
+		<p>[[${message}]]</p>
+		<p>You access your account, here <a th:href="@{/login}">login</a></p>
+	</div>
+	
+	<div class="mt-auto">
+    	<footer th:replace="fragments::footer()" />
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments :: admin_head('Customer | Chats')" />
+<body>
+<link rel="stylesheet" th:href="@{/css/chat.css}" />
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="fragments::top_navigation('chat')" />
+	<div th:replace="fragments::main_navigation('chat')" />
+	<div class="ml-5 mr-5 mt-4 d-flex flex-grow-1">
+		<div class="row flex-grow-1">
+			<div th:replace="fragments::customer_menu('chats')"></div>
+			<div class="col">
+				<div th:if="${message!=null}" class="alert alert-success">
+					[[${message}]]
+				</div>
+				<div class="d-flex flex-column">
+					<h3 class="mr-3">Customer Chats</h3>
+					<div class="d-none">
+						<a th:data-name="${user.username}" 
+							href="#" id="start-btn" class="btn btn-primary">Start Chatting</a>
+					</div>
+					<div class="chat-box d-flex">
+			            <div class="member-list w-25 border d-flex flex-column">
+			            	<div class="member m-3 active" data-href="chatroom">Public Chat Room
+			      				<div class="chat-status badge badge-light"><span class="fa fa-circle text-danger"> Offline</span></div>
+			                </div>
+			                <h4 class="text-center m-0 alert alert-secondary">Admin</h4>
+			                <ul class="member-content p-3 flex-grow-1">
+			                    <th:block th:each="username : ${allUsers}">
+				                    <li th:if="${user.username!=username}" th:class="${'member '+username}" th:data-href="${username}">
+				                    	[[${username}]]
+				                    	<span th:class="${#lists.contains(onlineUsers, username)?
+			                    			'user-status rounded-circle bg-success':'user-status rounded-circle bg-danger'}"></span>
+				                    </li>
+			                    </th:block>
+			                </ul>
+			            </div>
+			            <div class="chat-rooms w-75 ml-3 border p-3 d-flex">
+				            <!-- Public Chat window -->
+				            <div class="chat-content chatroom active">
+				                <ul class="chat-messages border flex-grow-1">
+				                	<th:block th:each="message : ${publicMessages}">
+				                		<li th:class="${user.username==message.username?'message self':'message'}">
+				                			<div th:if="${user.username} ne ${message.username}" class="avatar">
+				                				[[${message.username}]] <br />
+				                				<small class="badge date">[[${#dates.format(message.date, "dd/MM/YY")}]]</small>
+			                				</div>
+				                			<div class="message-data">[[${message.message}]]</div>
+				                			<div th:if="${user.username} eq ${message.username}" class="avatar self">
+				                				[[${message.username}]] <br />
+				                				<small class="badge">[[${#dates.format(message.date, "dd/MM/YY")}]]</small>
+				                			</div>
+			                			</li>
+				                	</th:block>
+				                </ul>
+				                <div class="send-message d-flex">
+				                    <input type="text" class="input-message form-control border-secondary rounded-0 flex-grow-1" 
+				                    	placeholder="enter the message" value="" /> 
+				                    <button type="button" class="send-button btn btn-primary rounded-0">send</button>
+				                </div>
+				            </div>
+				            
+				            <th:block th:each="username : ${allUsers}">
+				            	<div th:class="${'chat-content '+username}">
+				                <ul class="chat-messages border flex-grow-1">
+				                </ul>
+				                <div class="send-message d-flex">
+				                    <input type="text" class="input-message form-control border-secondary rounded-0 flex-grow-1" 
+				                    	placeholder="enter the message" value="" /> 
+				                    <button type="button" class="send-button btn btn-primary rounded-0">send</button>
+				                </div>
+				            </div>
+				            </th:block>
+			            </div>
+			        </div>
+				</div>
+				
+			</div>
+		</div>	
+	</div>
+	
+	<div class="mt-auto">
+		<footer th:replace="fragments::footer()" />
+	</div>
+</div>
+
+<script th:src="@{/js/1.1.4/sockjs.min.js}"></script>
+<script th:src="@{/js/2.3.3/stomp.min.js}"></script>
+<script th:src="@{/js/chat.js}"></script>
+
+</body>
+</html>

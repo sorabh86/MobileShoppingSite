@@ -1,0 +1,65 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments::page_head('Order Status')" />
+<body class="d-flex flex-column">
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="fragments::top_navigation(${page})" />
+	<div th:replace="fragments::main_navigation(${page})" />
+	
+	<div class="container mt-4">	
+		<div th:if="${!message.isEmpty()}" class="alert alert-info">
+			[[${message}]]
+		</div>
+		
+		<div class="row">
+			<div id="order-details" class="offset-lg-3 border p-4 col-lg-6 shadow rounded" th:with="address = ${order.address}">
+				<img th:src="@{/images/logo-sm.png}"/>
+				<h4 class="mt-3 d-flex">Order Receipt Details
+					<span th:if="${payStatus.toString()=='PAID'}" class="badge badge-success ml-auto">PAID</span>
+					<span th:if="${payStatus.toString()=='PENDING'}" class="badge badge-info ml-auto">NOT PAID</span>
+					<span th:if="${payStatus.toString()=='FAILED'}" class="badge badge-danger ml-auto">FAIL</span>
+				</h4>
+				<p style="position:relative">
+					<strong>Receipt Id: </strong>txn_[[${order.id}]] <br />
+					<strong>Order Date: </strong>[[${#dates.format(order.created_date,'dd MMM yyyy, HH:mm aa')}]] <br />
+					<strong>Order Status: </strong><span class="badge badge-dark">[[${order.status}]]</span> <br />
+					<strong>Payment Method: </strong>[[${(order.paymentMethod=="OP")?"Online Payment":"Cash on Delivery"}]] <br />
+				</p>
+				<p th:each="orderItem,status : ${order.orderItems}" class="item" style="position:relative">
+					<strong>[[${status.count}]]: [[${orderItem.phone.title}]] </strong> 
+					<span>x[[${orderItem.quantity}]] ---- </span> <span style="float:right">Rs. [[${orderItem.amount}]]</span>
+				</p>
+				<p class="text-danger text-right">
+					<strong>Grand Total: Rs. [[${totalPrice}]]</strong>
+				</p>
+				<p>
+					<strong>Address: </strong><br />
+					[[${
+						address.full_name+", "
+						+address.address_line_1+", "
+						+address.address_line_2+", "
+						+address.city+", "
+						+address.state+", "
+						+address.country+"-"
+						+address.zip
+					}]]
+				</p>
+				
+				<a id="print-btn" href="#" class="btn btn-primary">Print</a>
+			</div>
+		</div>
+	</div>
+	<div class="mt-auto">
+    	<footer th:replace="fragments::footer()" />
+    </div>
+</div>
+
+<script type="text/JavaScript" th:src="@{/js/jQuery.print.js}"></script>
+<script>
+	$("#print-btn").on("click", function(){
+		$("#order-details").print();
+		return false;
+	});
+</script>
+</body>
+</html>

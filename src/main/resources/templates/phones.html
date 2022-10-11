@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments::page_head('Phones Listing Page')" />
+<body>
+<style>
+.card-body {min-height:88px}
+</style>
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="fragments::top_navigation(${page})" />
+	<div th:replace="fragments::main_navigation(${page})" />
+	<div class="container mt-4">
+		<h1 class="mb-3">Phones</h1>
+		
+		<div th:if="${message}" class="alert alert-success">
+			<th:block th:utext="${message}"></th:block>
+		</div>
+		
+		<div class="phone_list row">
+			<div th:each="phone : ${phones}" class="col-lg-3 col-md-4 mb-3">
+				<div class="card shadow-lg">
+					<div class="card-header">
+						<a class="d-flex phone-img" th:href="@{'/phones/'+${phone.id}}">
+							<img th:src="${phone.imagePath}" alt="Phone Image" class="img-responsive m-auto" />
+						</a>
+					</div>
+					<div class="card-body">
+						<h4 class="card-title">[[${phone.title}]]</h4>
+						<span class="desc" th:if="${!phone.description.isEmpty()}">
+							<th:block th:text="${#strings.abbreviate(phone.description,52).replaceAll('<.*?>', '')}"></th:block>
+						</span>
+						<span class="no-desc" th:if="${phone.description.isEmpty()}">
+							<th:block >No Description Found</th:block>
+						</span>
+					</div>
+					<div class="">
+						<p class="text-danger mb-1 text-center"><strong>Rs. <span class="price">[[${phone.price}]]</span></strong></p>
+						<form class="form pl-1 pr-1" th:action="@{/addtocart}" method="post">
+							<input type="hidden" name="redirect" value="/phones"/>
+							<input type="hidden" name="quantity" value="1" />
+							<input type="hidden" name="phone_id" th:value="${phone.id}" />
+							<div class="form-group row m-2">
+								<button class="btn btn-danger col form-control m-1" type="submit">
+<!-- 									<span class="fa fa-cart-plus"></span>  -->
+									<span class=""> Add to Cart</span>
+								</button>
+								<a th:href="@{'/phones/'+${phone.id}}" class="btn btn-secondary col form-control m-1">Details</a>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="mt-auto">
+    	<footer th:replace="fragments::footer()" />
+    </div>
+</div>
+</body>
+</html>

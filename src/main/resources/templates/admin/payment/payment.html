@@ -1,0 +1,75 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments :: admin_head('Admin | Orders')" />
+<body>
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="admin/fragments::admin_navigation()" />
+	<div class="container">
+		<h2 class="mb-3">Admin | Online Payments</h2>
+		<div th:if="${payments==null}" class="alert alert-warning">No Payment Records Found!!!</div>
+		<table th:if="${payments}" class="table">
+			<thead>
+				<tr>
+					<th>Id</th>
+					<th>Order Id</th>
+					<th>Status</th>
+					<th>Amount</th>
+					<th>Razor Order Id</th>
+					<th>Razor Payment Id</th>
+					<th>Modify Date</th>
+					<th>Created Date</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="payment : ${payments}">
+					<td>[[${payment.id}]]</td>
+					<td>
+						[[${payment.order_id}]]
+					</td>				
+					<td>
+						[[${payment.status}]]
+					</td>
+					<td>
+						[[${payment.amount}]]
+					</td>
+					<td>
+						[[${payment.razorOrderId}]]
+					</td>
+					<td>
+						[[${payment.razorPaymentId}]]
+					</td>
+					<td>
+						[[${#dates.format(payment.modify_date,"dd/MM/yy hh:mm a")}]]
+					</td>
+					<td>
+						[[${#dates.format(payment.created_date,"dd/MM/yy hh:mm a")}]]
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div class="mt-auto">
+    	<footer th:replace="fragments::footer()" />
+    </div>
+</div>
+
+<div th:replace="admin/fragments::confirmWindow()"></div>
+
+
+<script>
+	// Add Delete Confirmation Logic
+	var $confirmWindow = $("#confirm-window");
+	$(".delete-btn").on("click", function() {
+		var href = $(this).data("href");
+		$confirmWindow.data("href", href);
+		$confirmWindow.modal();
+		return false;
+	});
+	$confirmWindow.find(".yes-btn").on("click", function(){
+		var href = $confirmWindow.data("href");
+		window.location.href = href;
+	});
+</script>
+
+</body>
+</html>

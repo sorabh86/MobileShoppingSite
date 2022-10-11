@@ -1,0 +1,131 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments :: admin_head('Admin | Return Orders')" />
+<body>
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="admin/fragments::admin_navigation()" />
+	<div class="container">
+		<h2 class="mb-3">Admin | Return Orders</h2>
+		<div th:if="${message!=null}" class="alert alert-success">[[${message}]]</div>
+		<div th:if="${error!=null}" class="alert alert-danger">[[${error}]]</div>
+		
+		<div th:if="${returnOrders==null}" class="alert alert-warning">No Order Found!!!<br> No Order had been requested by customers.</div>
+		<table th:if="${returnOrders}" class="table">
+			<thead>
+				<tr>
+					<th>Id</th>
+					<th>Order Id</th>
+					<th>Reason</th>
+					<th>Status</th>
+					<th>Modify Date</th>
+					<th>Create Date</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="return : ${returnOrders}">
+					<td>[[${return.id}]]</td>
+					<td><a th:href="@{${'/admin/orders/'+return.orderId+'/details'}}">[[${return.orderId}]]</a></td>
+					<td>[[${return.returnReason}]]</td>
+					<td class="return-status">[[${return.status}]]</td>
+					<td class="text-uppercase">
+						[[${#dates.format(return.modify_date,"dd/MM/yy hh:mm")}]]
+					</td>
+					<td class="text-uppercase">
+						[[${#dates.format(return.created_date,"dd/MM/yy hh:mm")}]]
+					</td>
+					<td>
+						<a class="return-btn" th:data-id="${return.id}" href="#">update</a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div class="mt-auto">
+    	<footer th:replace="fragments::footer()" />
+    </div>
+</div>
+
+<div th:replace="admin/fragments::confirmWindow()"></div>
+
+<div id="returnorder-window" class="modal fade">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header text-light bg-dark">
+        <h5 class="modal-title">Order Return Status</h5>
+        <button type="button" class="close text-light" data-dismiss="modal">
+        	<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+       	</button>
+      </div>
+      <div class="modal-body">
+        <div id="order-status-form" class="row">
+        	<form name="returnStatusForm" th:action="@{/admin/returns/status}" method="post">
+        		<input type="hidden" name="id" />
+	        	<input th:if="${_csrf!=null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	        	<div class="col-12">
+	        		<h4>Choose Return Order Status:</h4>
+	        		<label class="d-flex align-items-center" th:each="returnStatus : ${T(com.github.sorabh86.uigo.constants.ReturnStatus).values()}">
+		        		<input type="radio" class="mr-3 ml-3" name="returnStatus" th:value="${returnStatus}" th:text="${returnStatus}" />
+	        		</label>
+	        	</div>
+	        	<div class="col-12 mt-3">
+			       	<div class="row ml-3 mr-3">
+				        <button type="submit" class="update-btn btn btn-primary col">Update</button>
+				        <button type="button" class="ml-3 btn btn-secondary col" data-dismiss="modal">Cancel</button>
+				    </div>
+	        	</div>
+        	</form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+	
+<script>
+	// CHANGE RETURN ORDER STATUS
+	var $returnOrderWindow = $('#returnorder-window');
+	var $returnStatus = $returnOrderWindow.find("input[name=returnStatus]");
+	var $returnBtn = $(".return-btn");
+	var returnStatusForm = document.forms['returnStatusForm'];
+	
+	$returnBtn.on("click", function(){
+		var $this = $(this),
+			id = $this.data('id'),
+			$parent = $this.parent().parent(),
+			returnStatus = $parent.find(".return-status").html();
+		console.log(returnStatus);
+		
+		// remove all previous selection
+		$returnStatus.parent().removeClass("bg-warning");
+		$returnStatus.removeAttr('checked');
+		
+		// select current selection
+		var $Ele = $returnStatus.filter("[value="+returnStatus+"]");
+		$Ele.parent().addClass("bg-warning");
+		$Ele.attr('checked', 'checked');
+		$Ele[0].checked = true;
+		
+		// show popup window
+		$returnOrderWindow.modal();
+		$returnOrderWindow.find('input[name=id]').val(id);
+		
+		return false;
+	});
+	
+	
+	// Add Delete Confirmation Logic
+	var $confirmWindow = $("#confirm-window");
+	$(".delete-btn").on("click", function() {
+		var href = $(this).data("href");
+		$confirmWindow.data("href", href);
+		$confirmWindow.modal();
+		return false;
+	});
+	$confirmWindow.find(".yes-btn").on("click", function(){
+		var href = $confirmWindow.data("href");
+		window.location.href = href;
+	});
+</script>
+
+</body>
+</html>

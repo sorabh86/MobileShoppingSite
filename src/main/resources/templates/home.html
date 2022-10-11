@@ -1,0 +1,107 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments::page_head('Home Page')" />
+<body>
+	<div th:replace="fragments::top_navigation(${page})" />
+	<div th:replace="fragments::main_navigation(${page})" />
+	<div id="slider" class="carousel slide" data-ride="carousel">
+        <ol class="carousel-indicators">
+            <li data-target="#slider" data-slide-to="0" class="active"></li>
+            <li data-target="#slider" data-slide-to="1"></li>
+        </ol>
+
+        <div class="carousel-inner">
+            <div class="carousel-item active banner-1">
+                <img class="d-block w-100" src="images/banner.jpg" alt="">
+                <h2>30% OFF (First Order)</h2>
+                <h3>We work for happy customers <br>
+                    129MP Camera<br>
+                    4GB RAM/64GB ROM</h3>
+            </div>
+            <div class="carousel-item banner-2">
+                <img class="d-block w-100" src="images/banner-2.jpg" alt="">
+                <h2>SHOPPING WITH US</h2>
+                <h3>Best Mobile Phones <br>
+                    6GB RAM/128 ROM <br>
+                    4080MAH Battery</h3>
+            </div>
+        </div>
+    </div>
+    <div class="about-us bg-blue mb-5 text-light">
+        <div class="container">
+            <div class="row">
+                <div class="col-4">
+                    <img src="images/about-us-banner.jpg" alt="about-us-banner" class="img-fluid">
+                </div>
+                <div class="col-8">
+                    <h2 class="mt-4 mb-3">About Us</h2>
+                    <p>We are one of the best mobile phone manufacters, making quality technology that is accessible to everyone. We have 100+ offline mobile phone shops, which are selling in market around the globe. It was popularised in the 1960s with the release of feature phone with 2G technologies, and as time pass we improved with smart phone manufacturing industry. Our Mobile phones are best in performance. It is now using more latest processors, most fastest memory and best battery backup.</p>
+                    <a th:href="@{/about}" class="btn btn-danger">Read More</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="contact-info container mb-5">
+        <div class="row">
+            <div class="col-6">
+                <h3 class="text-orange mb-4">Contact Information</h3>
+                <div class="row">
+                    <div class="col-6">
+                        <h4>Address:</h4> 
+                        <address>
+                            UIGO Mobile Phone Pvt. Ltd.
+                            123 Street, Sahibabad, Ghaziabad, UP-201005
+                        </address>
+                        <address>
+                            UIGO Manufacting Pvt. Ltd.
+                            123 Street, Ice Lake, Utah-89372
+                        </address>
+                        <nav class="social-links">
+                            <a class="btn btn-primary bg-blue rounded-circle pl-3 pr-3 pt-2 pb-2" href="#"><span class="fab fa-facebook-f"></span></a>
+                            <a class="btn btn-primary bg-blue rounded-circle pl-3 pr-3 pt-2 pb-2" href="#"><span class="fab fa-twitter"></span></a>
+                            <a class="btn btn-primary bg-blue rounded-circle pl-3 pr-3 pt-2 pb-2" href="#"><span class="fab fa-linkedin-in"></span></a>
+                        </nav>
+                        </Address>
+                    </div>
+                    <div class="col-6">
+                        <h4>Email:</h4> 
+                        <span class="fa fa-envelope"></span> info@uigopvtltd.com <br>
+                        <span class="fa fa-envelope"></span> contact@uigo.com
+
+                        <h4 class="mt-3">Skype:</h4>
+                        <span class="fab fa-skype"></span> uigo.manufactur
+
+                        <h4 class="mt-3">Phone:</h4>
+                        <span class="fa fa-phone-square"></span> +91 8393999999 <br>
+                        <span class="fa fa-phone-square"></span> +91 8393999998
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <h3 class="text-orange mb-4">Contact Us</h3>
+                <form id="contact-form" class="">
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <input class="form-control" type="text" name="name" placeholder="Your Name" required>
+                        </div>
+                        <div class="col-md-6">
+                            <input class="form-control" type="text" name="phone" placeholder="Your Phone No." required>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-6">
+                            <textarea class="form-control" name="message" placeholder="Your Message" required></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <input class="form-control mb-3" type="text" name="email" placeholder="Your Email" required>
+                            <button class="btn btn-danger w-100" type="submit">send</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="fragments::footer()" />
+</body>
+</html>

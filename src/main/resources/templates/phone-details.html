@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head th:replace="fragments::page_head('Phone Detail Page')" />
+<body>
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="fragments::top_navigation('')" />
+	<div th:replace="fragments::main_navigation('')" />
+	
+	<div class="container mt-4">
+		<div th:if="${message}" class="alert alert-success">
+			<th:block th:utext="${message}"></th:block>
+		</div>
+		
+		<div class="row">
+			<div class="col-lg-4 d-flex border p-2 rounded phone-detail-img">
+				<img class="img-responsive m-auto" th:src="${phone.imagePath}" alt="Phone Photo" />
+			</div>
+			<div class="col">
+				<a class="m-3 btn btn-link text-dark btn-back" th:href="@{/phones}"><span class="fa fa-angle-left"></span> back</a>
+				<h1>[[${phone.title}]] </h1>
+				<div class="phone_desc mb-4">
+					<th:block th:utext="${phone.description}"></th:block>
+				</div>
+				<h3 class="text-dark text-bold">Rs. [[${phone.price}]]</h3>
+				<form class="form d-flex align-items-center" th:action="@{/addtocart}" method="post">
+					<input type="hidden" name="redirect" th:value="${redirect}" />
+					<input type="hidden" name="phone_id" th:value="${phone.id}" />
+					<div class="mr-3" style="width: 150px;">
+						<input type="text" name="quantity" value="1" class="form-control text-center"
+								data-bts-button-down-class="btn btn-primary"
+       							data-bts-button-up-class="btn btn-primary"/>
+					</div>
+					<button class="btn btn-danger btn-lg" type="submit">Add to Cart</button>
+				</form>
+				
+				<div class="feedback-ratings mt-4">
+					<h4>Feedback & Rating</h4>
+					<div class="alert alert-info" th:if="${(feedbacks==null || feedbacks.size()<1)}">No feedbacks found for this Phone!!!</div>
+					<div th:if="${feedbacks!=null}" th:each="feedback : ${feedbacks}" class="feedback card p-3 mb-3 d-flex flex-row">
+						<div class="bg-dark text-light rounded-circle mr-3 h4" style="display:flex;justify-content:center;align-items:center;min-width:50px;height:50px">
+							[[${#strings.toUpperCase(#strings.substring(feedback.user.username,0,1))}]]
+						</div>
+						<div class="flex-grow-1">
+							<div class="h6"><spanclass="username">[[${#strings.toUpperCase(feedback.user.username)}]]</span> 
+								<span class="float-right rate">
+									<span th:class="${(index<feedback.rate.value)?'text-warning fa fa-star':'fa fa-star text-secondary'}" th:each="index: ${#numbers.sequence(1,5)}" ></span>
+								</span>
+							</div>
+							<div class="user_feedback_msg pl-2">[[${feedback.user_feedback_msg}]]</div>
+						</div>
+					
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="mt-auto">
+    	<footer th:replace="fragments::footer()" />
+    </div>
+</div>
+	
+	<link rel="stylesheet" href="/css/jquery.bootstrap-touchspin.min.css" />
+	<script src="/js/jquery.bootstrap-touchspin.min.js"></script>
+	<script>
+	    $("input[name='quantity']").TouchSpin();
+	</script>
+</body>
+</html>

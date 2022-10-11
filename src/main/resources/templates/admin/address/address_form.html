@@ -1,0 +1,100 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments :: admin_head('Admin | User Form')" />
+<body>
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="admin/fragments::admin_navigation()" />
+	<div class="container">
+	
+		<h2 class="border-bottom pb-3 mb-4">[[${page_title}]] <span th:if="${user_id}"> [ <small>User([[${user_id}]])</small> ] </span></h2>
+		
+		<form class="form" name="customer_form" th:action="@{/admin/address/save}" method="post" 
+			th:object="${address}">
+			
+			<input type="hidden" th:field="*{id}" />
+
+			<div th:if="${users}" class="form-group row">
+				<label class="col-md-2">Choose a User: </label>
+				<div class="col-md-6">
+					<select class="form-control" id="userId" name="userId">
+						<option th:each="user1 : ${users}"
+							th:value="${user1.id}" th:text="${user1.id+' '+user1.full_name}" />
+					</select>			
+				</div>
+			</div>
+			<input th:if="${users==null}" type="hidden" th:field="*{userId}" />
+			
+			<div class="form-group row">
+				<label class="col-md-2">Full Name: </label>
+				<div class="col-md-6">
+					<input class="form-control" type="text" 
+						th:field="*{full_name}"
+						placeholder="Your Full Name"/>			
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-md-2">Phone: </label>
+				<div class="col-md-6">
+					<input class="form-control" type="text" 
+						th:field="*{phone}"
+						placeholder="Your Phone No"/>			
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-md-2">Address Line 1:</label>
+				<div class="col-md-6">
+					<input class="form-control" type="text" 
+						th:field="*{address_line_1}" placeholder="Address Line 1"/>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-md-2">Address Line 2:</label>
+				<div class="col-md-6">
+					<input class="form-control" type="text" 
+						th:field="*{address_line_2}" placeholder="Address Line 2"/>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-md-2">City:</label>
+				<div class="col-md-6">
+					<input class="form-control" type="text" 
+						th:field="*{city}" placeholder="Your City"/>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-md-2">State:</label>
+				<div class="col-md-6">
+					<input class="form-control" type="text" 
+						th:field="*{state}" placeholder="Your State"/>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-md-2">Country:</label>
+				<div class="col-md-6">
+					<input class="form-control" type="text" 
+						th:field="*{country}" placeholder="Your Country"/>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-md-2">Zip Code:</label>
+				<div class="col-md-6">
+					<input class="form-control" type="text" 
+						th:field="*{zip}" placeholder="Zip Code"/>
+				</div>
+			</div>
+			
+			<div class="form-group">
+				<div class="offset-md-2">
+					<input class="btn btn-primary mr-2" type="submit" value="Save" />
+					<a th:href="@{/admin/address}" class="btn btn-dark" >Cancel</a>
+				</div>
+			</div>
+		</form>
+	</div>
+	
+	<div class="mt-auto">
+		<footer th:replace="fragments::footer()" />
+	</div>
+</div>
+</body>
+</html>

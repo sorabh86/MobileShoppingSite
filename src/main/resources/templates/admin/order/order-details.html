@@ -1,0 +1,266 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments :: admin_head('Admin | Orders')" />
+<body>
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="admin/fragments::admin_navigation()" />
+	<div class="container">
+		<h2 class="border-bottom pb-3 mb-4">Admin | Order Details</h2>
+		
+		<div class="order-details">
+		
+			<div class="row mb-2">
+				<strong class="col-2 text-right">Order Id :</strong> 
+				<span class="col-10">[[${order.id}]]</span>
+			</div>
+			<div class="row mb-2">
+				<strong class="col-2 text-right">Dates :</strong> 
+				<span class="col-10">[[${#dates.format(order.created_date,"dd MMM, yyyy hh:mm a")}]]</span>
+			</div>
+			<div class="row mb-2">
+				<strong class="col-2 text-right">Delivery:</strong> 
+				<span class="col-10" id="days" th:data-day="${order.expected_delivery_days}">[[${order.expected_delivery_days==null?'Not Approved.':order.expected_delivery_days+' Days'}]]</span>
+			</div>
+			<div class="row mb-2" th:with="adr = ${order.address}" >
+				<strong class="col-2 text-right">Address :</strong> 
+				<a class="col-10" th:href="@{'/admin/address/'+${adr.userId}}">
+					<th:block class="pl-5" th:utext="${adr.full_name+' '+adr.address_line_1+
+					', '+adr.address_line_2+' '+adr.city+' '+adr.state+', '+adr.country+'-'+adr.zip}"></th:block>
+				</a>
+			</div>
+			<div class="row mb-2">
+				<strong class="col-2 text-right">Status :</strong> 
+				<div class="col-10"><div id="status">[[${order.status}]]</div>
+					<small class="text-info">If Payment Method is Cash on Delivery and Status is Delivered means payment received on delivery.</small>
+				</div>
+			</div>
+			<div class="row mb-2">
+				<strong class="col-2 text-right">Message :</strong> 
+				<span class="col-10 status">[[${order.message.isEmpty?'No Message':order.message}]]</span>
+			</div>
+			<div class="row mb-2">
+				<strong class="col-2 text-right">Payment Method :</strong> 
+				<div class="col-10 status text-uppercase">
+					[[${order.paymentMethod=="OP"?'online payment':'cash on delivery'}]]
+					
+					<!-- CASH ON DELIVERY -->
+					<span th:if="${(order.paymentMethod=='COD' && order.status.toString()=='DELIVERED')}" class="pay-status badge badge-success">PAID</span>
+					<span th:if="${order.paymentMethod=='COD' && order.status.toString()!='DELIVERED'}" class="pay-status badge badge-secondary">NOT PAID</span>
+					
+					<!-- ONLINE -->
+					<span th:if="${(order.paymentMethod=='OP' && order.payments.size()>0) 
+						&& order.payments.get(0).status.toString=='PENDING'}" class="pay-status badge badge-info">PENDING</span>
+					<span th:if="${(order.paymentMethod=='OP' && order.payments.size()>0) 
+						&& order.payments.get(0).status.toString=='PAID'}" class="pay-status badge badge-success">PAID</span>
+					<span th:if="${order.paymentMethod=='OP' && order.payments.isEmpty}" class="badge badge-secondary">NOT PAID</span>
+				</div>
+			</div>
+			<table class="table mt-4 order-items" th:with="orderItems = ${order.orderItems}">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Image</th>
+						<th>Title</th>
+						<th class="text-right">Quantity</th>
+						<th class="text-right">Amount (Rs)</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr class="item" th:each="orderItem, status : ${orderItems}">
+						<td>[[${status.count}]]</td>
+						<td><img class="max-width:60px" height="60" th:src="${orderItem.phone.imagePath}" alt="Phone Image" /></td>
+						<td>[[${orderItem.phone.title}]]</td>
+						<td class="text-right">x[[${orderItem.quantity}]]</td>
+						<td class="text-right">Rs [[${orderItem.amount}]]</td>
+					</tr>
+					<tr class="border-amt">
+						<td></td>				
+						<td></td>				
+						<td></td>				
+						<td></td>				
+						<td class="total-amount text-right font-weight-bold text-danger">Rs [[${order.grandTotal}]]</td>
+					</tr>
+				</tbody>
+			</table>
+			<div class="row p-3 mb-2">
+				<a class="btn btn-dark mr-auto" th:href="@{/admin/orders}" href="#">Go Back</a>
+				<div class="offset-2">
+					<a class="status-btn btn btn-primary" th:data-href="${'/admin/orders/'+order.id+'/status'}" href="#">Change Status</a>
+					<a class="delete-btn btn btn-danger" th:data-href="@{'/admin/orders/'+${order.id}+'/delete'}" href="#">Delete</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="mt-auto">
+    	<footer th:replace="fragments::footer()" />
+    </div>
+</div>
+
+<div th:replace="admin/fragments::confirmWindow()"></div>
+
+<div id="order-status-window" class="modal fade">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header text-light bg-dark">
+        <h5 class="modal-title">Order Status</h5>
+        <button type="button" class="close text-light" data-dismiss="modal">
+        	<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+       	</button>
+      </div>
+      <div class="modal-body">
+        <div id="order-status-form" class="row">
+        	<input th:if="${_csrf!=null}" type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        	<div class="col-6">
+        		<h4>Choose Order Status:</h4>
+        		<label class="d-flex align-items-center" th:each="orderStatus : ${T(com.github.sorabh86.uigo.constants.OrderStatus).values()}">
+	        		<input type="radio" class="mr-3 ml-3" name="order_status" th:value="${orderStatus}" th:text="${orderStatus}" />
+        		</label>
+        	</div>
+        	<div class="col-6">
+        		<h4>Day of Delivery</h4>
+        		<label class="d-flex align-items-center"><input class="mr-3 ml-3" type="radio" name="delivery_days" value="30"/> 30 Days</label>
+        		<label class="d-flex align-items-center"><input class="mr-3 ml-3" type="radio" name="delivery_days" value="15"/> 15 Days</label>
+        		<label class="d-flex align-items-center"><input class="mr-3 ml-3" type="radio" name="delivery_days" value="7"/> 7 Days</label>
+        		<label class="d-flex align-items-center"><input class="mr-3 ml-3" type="radio" name="delivery_days" value="5" checked/> 5 Days</label>
+        		<label class="d-flex align-items-center"><input class="mr-3 ml-3" type="radio" name="delivery_days" value="2"/> 2 Days</label>
+        		<label class="d-flex align-items-center"><input class="mr-3 ml-3" type="radio" name="delivery_days" value="1"/> 1 Days</label>
+        		<label>
+        			<input id="custom-day" class="mr-3 ml-3" type="radio" name="delivery_days" value="custom"/> Custom
+        			<input class="ml-2 p-1 pl-3 pr-3" type="number" />
+        		</label>
+        	</div>
+        	<div class="col mt-3">
+		       	<div class="row ml-3 mr-3">
+			        <button type="button" class="update-btn btn btn-primary col">Update</button>
+			        <button type="button" class="ml-3 btn btn-secondary col" data-dismiss="modal">Cancel</button>
+			    </div>
+        	</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+	
+<script>
+	// Add Delete Confirmation Logic
+	var $confirmWindow = $("#confirm-window");
+	$(".delete-btn").on("click", function() {
+		var href = $(this).data("href");
+		$confirmWindow.data("href", href);
+		$confirmWindow.modal();
+		return false;
+	});
+	$confirmWindow.find(".yes-btn").on("click", function(){
+		var href = $confirmWindow.data("href");
+		window.location.href = href;
+	});
+	
+	// Update Total Amount for Order Items
+	var $orderItems = $(".order-items");
+	for(var i=0; i< $orderItems.length; i++) {
+		var $orderItem = $($orderItems[i]).find(".item");
+		var totalAmount = 0;
+		for(var j=0; j < $orderItem.length; j++) {
+			var $subItem = $($orderItem[j]);
+			var qty = $subItem.find(".item-quantity").html();
+			var amt = $subItem.find(".item-amount").html();
+			totalAmount += (amt*qty);
+		}
+		$orderItem.find(".total-amount").html("Total: "+totalAmount);
+	}
+	
+	// Change status use AJAX call
+	var $orderForm = $("#order-status-form");
+	var $orderWindow = $("#order-status-window");
+	var $orderStatus = $("input[name=order_status]");
+	var $deliverDays = $("input[name=delivery_days]");
+	var $customDay = $deliverDays.filter("#custom-day"),
+		$customDayInput = $customDay.parent().find("input[type=number]");
+	
+	$(".status-btn").on("click", function() {
+		var day = $('#days').data('day');
+		var status = $('#status').html();
+		var $this = $(this);
+		
+		$orderStatus.removeAttr("checked", "");
+		$orderStatus.filter("[value="+status+"]").attr('checked', 'checked');
+		if(day) {
+			var $deldays = $deliverDays.filter("[value="+day+"]");
+			if($deldays.length>0) {
+				$deldays.attr('checked', 'checked');
+				$deldays[0].checked = true;
+			} else {			
+				$customDay.attr("checked", true);			
+				$customDay[0].checked = true;
+				$customDayInput.val(day);
+			}
+		}
+		
+		$orderWindow.data("href", $this.data("href"));
+		$orderWindow.data("parent", $this.parent());
+		$orderWindow.modal({
+			backdrop: 'static',
+		    keyboard: false
+		});
+		return false;
+	});
+	
+	$customDay.on("click", function(){ 
+		$customDayInput.focus();	
+	});
+	$customDayInput.on("click", function(){ 
+		$deliverDays.attr("checked", false); 
+		$customDay.attr("checked", true);
+		$customDay[0].checked = true;
+		return false;
+	});
+	
+	$orderForm.find(".update-btn").on("click", function(){
+		var order_status = $orderStatus.filter(":checked").val();
+		var $deliveryDays = $deliverDays.filter(":checked");
+		var delivery_days = $deliveryDays.val();
+		var _csrf = $orderForm.find("input[name=_csrf]").val();
+		var href = $orderWindow.data("href");
+		
+		console.log(order_status, delivery_days, href, _csrf);
+		
+		if(delivery_days =='custom') {
+			delivery_days = parseInt($customDayInput.val());
+			if(delivery_days == '') {				
+				alert("Please Input Custom Day");
+				return false;
+			}
+		}		
+		if(!order_status || order_status=='' || !delivery_days || delivery_days=='') {
+			alert("Choose Status and days");
+			return false;
+		}
+		
+		$.post({
+			url:href,
+			data:{
+				order_status: order_status,
+				delivery_days: delivery_days,
+				_csrf: _csrf
+			},
+			success:function(d) {
+				if(d.message=='OK') {
+					$orderWindow.modal("hide");
+					$('#days').data('day',delivery_days);
+					$('#days').html(delivery_days+' Days')
+					$('#status').html(d.status);
+				}
+				console.log("Successful: ",d);
+			},
+			error:function(e) {
+				console.error(e.responseText);
+				var error = JSON.parse(e.responseText);
+				alert("Error: "+error.message);
+			}
+		});
+		
+	});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments::page_head('Login Page')" />
+<body>
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="fragments::top_navigation(${page})" />
+	<div th:replace="fragments::main_navigation(${page})" />
+	<div class="container mb-4">
+		<div class="card shadow mt-5 ml-auto mr-auto p-4">
+			<h2 class="text-center mb-3">Login</h2>
+			<p class="alert alert-success mt-4" th:if="${message}">[[${message}]]</p>
+			<div th:if="${param.error}" class="alert alert-danger">
+				Invalid Username and Password.
+			</div>
+			<div th:if="${param.logout}" class="alert alert-success">
+				You are logged out.
+			</div>
+			<form class="form" th:action="@{/login}" method="post">
+				
+				<div class="form-group row">
+					<label class="col-md-3 text-right" for="username">Username:</label>
+					<div class="col-md-9">
+						<input class="form-control" type="text" name="username" required/>
+					</div>
+				</div>
+				<div class="form-group row">
+					<label class="col-md-3 text-right" for="password">Password:</label>
+					<div class="col-md-9">
+						<input class="form-control" type="password" name="password" required/>
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="offset-md-3">
+						<input class="btn btn-primary" type="submit" value="Login" />
+						<span class="ml-4">Do not have account? <a th:href="@{/register}" class="btn btn-link">Register</a></span>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	
+	<div class="mt-auto">
+    	<footer th:replace="fragments::footer()" />
+    </div>
+</div>
+<script>
+	$("input[name=username]").focus();
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments::page_head('Register Page')" />
+<body>
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="fragments::top_navigation(${page})" />
+	<div th:replace="fragments::main_navigation(${page})" />
+	<div class="container">		
+		<p class="alert alert-success mt-4" th:if="${message}">[[${message}]]</p>
+		<p class="alert alert-danger mt-4" th:if="${error}">[[${error}]]</p>
+		<h2 class="text-center mb-3 mt-4">Customer Register</h2>
+		<form class="form" name="customer_form" th:action="@{/customer/save}" method="post" th:object="${user}">
+			<div class="form-group row">
+				<label class="col-md-3 text-right" for="username">Username: </label>
+				<div class="col-md-9">
+					<input class="form-control" type="text" name="username" th:field="*{username}"/>			
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-md-3 text-right" for="password">Password:</label>
+				<div class="col-md-9">
+					<input class="form-control" type="password" name="password" th:field="*{password}" />
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-md-3 text-right" for="full_name">Full Name:</label>
+				<div class="col-md-9">
+					<input class="form-control" type="text" name="full_name" th:field="*{full_name}"/>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-md-3 text-right" for="email">Email:</label>
+				<div class="col-md-9">
+					<input class="form-control" type="email" name="email"  th:field="*{email}"/>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-md-3 text-right" for="phone_no">Phone No:</label>
+				<div class="col-md-9">
+					<input class="form-control" type="text" name="phone_no" th:field="*{phone_no}"/>
+				</div>
+			</div>
+			<input type="hidden" name="role" th:field="*{role}" />
+			<input type="hidden" name="status" th:field="*{status}"/>
+			<div class="form-group">
+				<div class="offset-md-3">
+				<input class="btn btn-primary text-center" type="submit" value="Register" />
+				<span class="ml-4">Already have account? <a class="btn btn-link" th:href="@{/login}">login</a></span>
+				</div>
+			</div>
+		</form>
+	</div>
+	
+	<div class="mt-auto">
+    	<footer th:replace="fragments::footer()" />
+    </div>
+</div>
+</body>
+</html>

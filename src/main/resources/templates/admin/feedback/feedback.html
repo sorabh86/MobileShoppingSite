@@ -1,0 +1,74 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments :: admin_head('Admin | Orders')" />
+<body>
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="admin/fragments::admin_navigation()" />
+	<div class="container">
+		<h2 class="mb-3">Admin | Feedback</h2>
+		<div th:if="${feedbacks==null}" class="alert alert-warning">No Feedback Found!!!<br> No Feedback submitted by customers.</div>
+		<table th:if="${feedbacks}" class="table">
+			<thead>
+				<tr>
+					<th>Id</th>
+					<th>Rate</th>
+					<th>Date</th>
+					<th>Order Id</th>
+					<th>User</th>
+					<th>Phone</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="feedback : ${feedbacks}">
+					<td>[[${feedback.id}]]</td>
+					<td>
+						<span th:each="index: ${#numbers.sequence(1,5)}" 
+							th:data-index="${index}"
+							th:class="${index<=feedback.rate.value?'p-0 fa fa-star fa-2x text-warning':'p-0 fa fa-star fa-2x text-secondary'}" 
+							></span>
+					</td>
+					<td>
+						[[${#dates.format(feedback.date,"hh:mm a")}]],
+						[[${#dates.format(feedback.date,"dd MMM, yyyy")}]]
+					</td>					
+					<td>
+						[[${feedback.order.id}]]
+					</td>
+					<td>
+						[[${feedback.user.username}]]
+					</td>
+					<td>
+						[[${feedback.phone.title}]]
+					<td>
+						<a class="delete-btn text-danger" href="#"
+							th:data-href="@{'/admin/feedbacks/'+${feedback.id}+'/delete'}" >Delete</a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div class="mt-auto">
+    	<footer th:replace="fragments::footer()" />
+    </div>
+</div>
+
+	<div th:replace="admin/fragments::confirmWindow()"></div>
+	
+	<script>
+		// Add Delete Confirmation Logic
+		var $confirmWindow = $("#confirm-window");
+		$(".delete-btn").on("click", function() {
+			var href = $(this).data("href");
+			$confirmWindow.data("href", href);
+			$confirmWindow.modal();
+			return false;
+		});
+		$confirmWindow.find(".yes-btn").on("click", function(){
+			var href = $confirmWindow.data("href");
+			window.location.href = href;
+		});
+	</script>
+
+</body>
+</html>

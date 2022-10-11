@@ -1,0 +1,82 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments :: admin_head('Admin | Orders')" />
+<body>
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="admin/fragments::admin_navigation()" />
+	<div class="container">
+		<h2 class="mb-3">Admin | Orders</h2>
+		<div th:if="${orders==null}" class="alert alert-warning">No Order Found!!!<br> No Order had been requested by customers.</div>
+		<table th:if="${orders}" class="table">
+			<thead>
+				<tr>
+					<th>Id</th>
+					<th>Order Date</th>
+					<th>Status</th>
+<!-- 					<th>Customer Message</th> -->
+					<th>Delivery</th>
+					<th>Grand Total (Rs)</th>
+					<th>Payment</th>
+					<th>Option</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="order : ${orders}" th:class="${!order.isVisited?'bg-visted order order-'+order.id:'order order-'+order.id}">
+					<td>[[${order.id}]]</td>
+					<td class="text-uppercase">
+						<small>[[${#dates.format(order.created_date,"dd/MM/yy")}]]</small>
+					</td>
+					<td>
+						<small th:class="${order.status.toString=='REJECTED'?'badge badge-danger':
+							(order.status.toString=='DELIVERED')?'badge badge-success':
+							(order.status.toString=='APPROVED')?'badge badge-warning':
+							(order.status.toString=='SHIPPED')?'badge badge-info':''}">[[${order.status}]]</small>
+					</td>
+<!-- 					<td>[[${order.message}]]</td> -->
+					<td>
+						<small class="text-uppercase badge badge-success">[[${order.paymentMethod=='OP'?'ONLINE':'CASH ON DELIVERY'}]]</small><br />
+						<small>[[${order.expected_delivery_days==null?'Not Approved.':order.expected_delivery_days+' Days'}]]</small>
+						<small th:if="${order.delivery_date}" class="text-uppercase"><br />[[${#dates.format(order.delivery_date,"dd/MM/yy hh:mm a")}]]</small>
+					</td>
+					<td>[[${order.grandTotal}]]</td>
+					<td>
+						<span th:if="${(order.paymentMethod=='COD' && order.status.toString()=='DELIVERED')}" class="badge badge-success">PAID</span>
+						<span th:if="${order.paymentMethod=='COD' && order.status.toString()!='DELIVERED'}" class="badge badge-secondary">NOT PAID</span>
+						
+						<span th:if="${(order.paymentMethod=='OP' && order.payments.size()>0) 
+							&& order.payments.get(0).status.toString=='PENDING'}" class="badge badge-info">PENDING</span>
+						<span th:if="${(order.paymentMethod=='OP' && order.payments.size()>0) 
+							&& order.payments.get(0).status.toString=='PAID'}" class="badge badge-success">PAID</span>
+						<span th:if="${order.paymentMethod=='OP' && order.payments.isEmpty}" class="badge badge-secondary">NOT PAID</span>
+					<td>
+						<a th:href="@{'/admin/orders/'+${order.id}+'/details'}">View</a> |
+						<a class="delete-btn text-danger" th:data-href="@{'/admin/orders/'+${order.id}+'/delete'}" href="#">Delete</a>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div class="mt-auto">
+    	<footer th:replace="fragments::footer()" />
+    </div>
+</div>
+
+	<div th:replace="admin/fragments::confirmWindow()"></div>
+	
+	<script>
+		// Add Delete Confirmation Logic
+		var $confirmWindow = $("#confirm-window");
+		$(".delete-btn").on("click", function() {
+			var href = $(this).data("href");
+			$confirmWindow.data("href", href);
+			$confirmWindow.modal();
+			return false;
+		});
+		$confirmWindow.find(".yes-btn").on("click", function(){
+			var href = $confirmWindow.data("href");
+			window.location.href = href;
+		});
+	</script>
+
+</body>
+</html>

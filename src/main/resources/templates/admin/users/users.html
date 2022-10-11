@@ -1,0 +1,66 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments :: admin_head('Admin | Users')" />
+<body>
+	<div class="d-flex flex-column" style="min-height:100vh">
+		<div th:replace="admin/fragments::admin_navigation()" />
+		<div class="container">
+			
+			<h2 class="border-bottom pb-3 mb-3">Admin | Users <a class="btn btn-primary" th:href="@{/admin/users/new}">Add User</a></h2>
+			
+			<div th:if="${message!=null}" class="alert alert-success">[[${message}]]</div>
+			<div th:if="${error!=null}" class="alert alert-danger">[[${error}]]</div>
+			
+			<table class="table ">
+				<thead>
+					<tr>
+						<th>Id</th>
+						<th>Username</th>
+						<th>Email</th>
+						<th>Full Name</th>
+						<th>Phone No</th>
+						<th>Role</th>
+						<th>Status</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="user : ${users}">
+						<td>[[${user.id}]]</td>
+						<td>[[${user.username}]]</td>
+						<td>[[${user.email}]]</td>
+						<td>[[${user.full_name}]]</td>
+						<td>[[${user.phone_no}]]</td>
+						<td>[[${user.role}]]</td>
+						<td>[[${user.status}]]</td>
+						<td>
+							<a th:href="@{'/admin/users/'+${user.id}+'/edit'}">Edit</a> | 
+							<a class="delete-btn text-danger" th:data-href="@{'/admin/users/'+${user.id}+'/delete'}" href="#">Delete</a>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	
+		<div class="mt-auto">
+			<footer th:replace="fragments::footer()" />
+		</div>
+	</div>
+	
+	<div th:replace="admin/fragments::confirmWindow()"></div>
+	
+	<script>
+		var $confirmWindow = $("#confirm-window");
+		$(".delete-btn").on("click", function() {
+			var href = $(this).data("href");
+			$confirmWindow.data("href", href);
+			$confirmWindow.modal();
+			return false;
+		});
+		$confirmWindow.find(".yes-btn").on("click", function(){
+			var href = $confirmWindow.data("href");
+			window.location.href = href;
+		});
+	</script>
+</body>
+</html>

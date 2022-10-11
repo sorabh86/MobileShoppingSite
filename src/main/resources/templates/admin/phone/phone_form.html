@@ -1,0 +1,75 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="admin/fragments :: admin_head('Admin | Phone Form')" />
+<body>
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="admin/fragments::admin_navigation()" />
+	<div class="container">
+	
+		<h2 class="border-bottom pb-3 mb-4">[[${page_title}]]</h2>
+		
+		<form class="form" name="customer_form" th:action="@{/admin/phones/save}" method="post" 
+			enctype="multipart/form-data" th:object="${phone}">
+			<input type="hidden" th:field="*{id}" />
+			<div class="form-group row">
+				<label class="col-md-2">Title: </label>
+				<div class="col-md-6">
+					<input class="form-control" type="text" th:field="*{title}" placeholder="Title of Phone"/>			
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-md-2">Description:</label>
+				<div class="col-md-6">
+					<textarea class="form-control" th:field="*{description}" rows="6"
+						 placeholder="Description of Phone"></textarea>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-md-2">Image:</label>
+				<div class="col-md-6">
+					<input type="hidden" th:field="*{image}" />
+					<input class="form-control" type="file" id="phone_image" name="phone_image"  accept="image/png, image/jpeg"/>
+				</div>
+				<div class="col-md-2">
+					<img id="preview" th:src="${phone.imagePath}" alt="Phone Photo"  height="80" />
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-md-2">Price:</label>
+				<div class="col-md-6">
+					<input class="form-control" type="text" th:field="*{price}"/>
+				</div>
+			</div>
+			
+			<div class="form-group">
+				<div class="offset-md-2">
+					<input class="btn btn-primary mr-2" type="submit" value="Save" />
+					<a th:href="@{/admin/phones}" class="btn btn-dark" >Cancel</a>
+				</div>
+			</div>
+		</form>
+	</div>
+	<div class="mt-auto">
+    	<footer th:replace="fragments::footer()" />
+    </div>
+</div>
+
+	<script>
+	(function($){
+		
+		/* show preview of image */
+		$("#phone_image").on("change", function() {
+			var file = this.files[0],
+				$preview = $("#preview");
+			
+			var fileReader = new FileReader();
+			fileReader.readAsDataURL(file);
+			fileReader.onload = function(e) {
+				$preview.attr("src", e.target.result);				
+			}
+			
+		});
+	})(jQuery);
+	</script>
+</body>
+</html>

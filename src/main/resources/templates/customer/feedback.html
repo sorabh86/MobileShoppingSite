@@ -1,0 +1,258 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments :: page_head('Customer | Feedback')" />
+<body>
+<div class="d-flex flex-column" style="min-height:100vh">
+	<div th:replace="fragments::top_navigation('customer')" />
+	<div th:replace="fragments::main_navigation('customer')" />
+	<div class="ml-5 mr-5 mt-4 d-flex flex-grow-1">
+		<div class="row flex-grow-1">
+			<div th:replace="fragments::customer_menu('feedback')"></div>
+			<div class="col">
+				<div th:if="${message!=null}" class="alert alert-success">
+					[[${message}]]
+				</div>
+				<div class="mb-3 d-flex">
+					<h3 class="mr-3">Customer Feedback on delivered phones</h3>
+				</div>
+				
+				<div class="feedback-content">
+					<div class="alert alert-warning" th:if="${orders==null || orders.size()<1}">No Feedback Available.</div>
+					
+					<div class="orders">
+						<div class="order card mb-2 border-bottom-0 shadow" 
+							th:each="order:${orders}">
+							<h4 class="p-3">Order Id: txn_[[${order.id}]]</h4>
+							<div class="ml-3 orderitem d-flex align-items-center border-bottom" 
+								th:each="orderitem, status:${order.orderItems}">
+								<span class="h4 p-3">[[${status.count}]]</span>
+								<a th:href="@{${'/phones/'+orderitem.phone.id}}" style="min-width:80px;height:80px" class="d-flex mr-3 p-2">
+									<img class="img-responsive m-auto" th:src="@{${orderitem.phone.imagePath}}" alt="Phone Image" />
+								</a>
+								<div class="h3 flex-grow-1">
+									<a class="text-dark" th:href="@{${'/phones/'+orderitem.phone.id}}" >
+									<span class="title">[[${orderitem.phone.title}]]</span> 
+									<small class="date badge badge-success"> delivery on [[${#dates.format(order.delivery_date, "dd-MMM-yyyy")}]]</small>
+									</a>
+								</div> 
+								<a class="feedback-btn btn btn-secondary mr-3" th:data-oid="${order.id}" 
+									th:data-pid="${orderitem.phone.id}" href="#">Feedback</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>	
+	</div>
+	
+	<div class="mt-auto">
+		<footer th:replace="fragments::footer()" />
+	</div>
+</div>
+
+	<div id="feedback-window" class="modal fade">
+	  <div class="modal-dialog">
+       	<form name="feedbackForm" th:action="@{/customer/feedback/save}" method="post" novalidate>
+<!-- 			<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" /> -->
+			<input type="hidden" name="phone_id"  />
+			<input type="hidden" name="order_id"  />
+			<input type="hidden" name="id" />
+		    <div class="modal-content">
+		      	<div class="modal-header bg-dark text-light">
+			        <h4 class="modal-title">Feedback</h4>
+			        <button type="button" class="close text-light" data-dismiss="modal">
+			        	<span aria-hidden="true">&times;</span><span class="sr-only">Close</span>
+		        	</button>
+		      	</div>
+		       	<div class="modal-body">
+			      	<div class="rate form-group">
+			      		<div class="warning">
+							<span th:class="${'p-0 btn fa fa-star fa-3x text-secondary star-'+index}" 
+									th:data-index="${index}"
+									th:each="index: ${#numbers.sequence(1,5)}" ></span>
+							<small>Click on star to give rating.</small>
+			      		</div>
+						<input type="hidden" name="rate" />
+						<div class="invalid-feedback">
+					        Please rate this phone.
+					    </div>
+					</div>	      	
+					<div class="form-group">
+						<label>Write something about phone</label>
+						<textarea name="feedback_msg" id="feedback_msg" class="form-control"
+							 placeholder="Please write your review" required 
+							 cols="30" rows="10"></textarea> 
+						<div class="invalid-feedback">
+					        Please provide your feedback.
+				    	</div>
+					</div>
+				</div>
+		      	<div class="modal-footer border-0 row p-0 pb-3 ml-3 mr-3 ">
+		        	<button id="submit-btn" type="submit" class="btn btn-primary col">Submit</button>
+		        	<button type="button" class="btn btn-secondary col" data-dismiss="modal">Cancel</button>
+		      	</div>
+		    </div><!-- /.modal-content -->
+	    </form>
+	  </div><!-- /.modal-dialog -->
+	</div><!-- /.modal -->
+	
+	<div id="loading">
+		<div class="spinner-border text-light"
+			style="position: fixed; left: 50%; top: 50%">
+			<span class="sr-only">Loading...</span>
+		</div>
+	</div>
+	
+	<script>
+		function checkIfAlreadySubmitted(pid, oid) {
+			$.post({
+				url:"/customer/feedback/"+pid+"/"+oid,
+				type:"POST",
+				data:{_csrf:$('input[name=_csrf]').val()},
+				dataType:"json",
+				beforeSend: function(){
+			        $('#loading').show();
+			    },success:function(s){
+			    	if(s.status) {
+			    		document.forms.feedbackForm['id'].value = s.id;
+			    		document.forms.feedbackForm['feedback_msg'].value = s.msg;
+			    		document.forms.feedbackForm['rate'].value = s.rate;
+			    		$(".star-"+s.rate).click();
+			    	}
+				}, error:function(e){
+					$feedbackWindow.modal("hide");
+					console.error("Server Error", e);
+				}, complete: function(){
+			        $('#loading').hide();
+			    }
+			})
+		}
+	
+		// feedback icon click feature
+		var $feedbackWindow = $("#feedback-window"),
+			$stars = $feedbackWindow.find(".fa-star");
+		
+		$(".feedback-btn").on("click", function() {
+			var $this = $(this),
+				orderId = $this.data("oid"),
+				phoneId = $this.data("pid");
+			
+			// reset feedbackFrom
+			document.forms.feedbackForm['id'].value = '';
+    		document.forms.feedbackForm['feedback_msg'].value = '';
+    		document.forms.feedbackForm['rate'].value = '';
+    		$stars.removeClass("text-warning");
+    		
+			// check if feedback submitted
+			checkIfAlreadySubmitted(phoneId, orderId);
+			
+			$feedbackWindow.data("order_id", orderId);
+			$feedbackWindow.data("phone_id", phoneId);
+			
+			$feedbackWindow.find("input[name=order_id]").val(orderId);
+			$feedbackWindow.find("input[name=phone_id]").val(phoneId);
+			
+			$feedbackWindow.modal();
+			return false;
+		});
+		
+		$stars.on("click", function(){
+			var $this = $(this),
+				$parent = $(this).parent().parent(),
+				rate = $this.data("index");
+			
+			$stars.removeClass("text-warning");
+			for(var i=1; i<=rate; i++) {
+				var $temp = $parent.find(".star-"+i);
+				$temp.addClass("text-warning");
+			}
+			
+			var $rate = $parent.find("input[name=rate]");
+			$rate.val(rate);
+			$rate.parent().find(".warning").removeClass("rounded border border-danger");
+			$rate.removeClass('is-invalid');
+		});
+		
+		/** FEEDBACK FORM VALIDATION **/
+		var $feedbackMsg = $feedbackWindow.find("textarea[name='feedback_msg']");
+		$feedbackMsg.on("input",function(){
+			if(this.value=="") $feedbackMsg.addClass('is-invalid');
+			else $feedbackMsg.removeClass('is-invalid');
+		});
+		
+		$(document.forms.feedbackForm).on("submit", function(){
+			var form = document.forms.feedbackForm,
+				$rate = $(form['rate']),
+				$feedbackMsg = $(form['feedback_msg']),
+				rate = form['rate'].value,
+				msg = form['feedback_msg'].value,
+				orderId = form['order_id'].value,
+				phoneId = form['phone_id'].value;
+			
+			console.log($rate, $feedbackMsg, rate, msg, orderId, phoneId);
+			
+			if(rate=="" || msg=="" || orderId=="" || phoneId=="") {
+				if(rate=="") {
+					$rate.parent().find(".warning").addClass("rounded border border-danger");
+					$rate.addClass('is-invalid');
+				}
+				if(msg==""){
+					$feedbackMsg.addClass('is-invalid');
+				}
+				
+				return false;
+			}
+		});
+		
+// 		$("#submit-btn").on("click", function(){
+// 			var $rate = $feedbackWindow.find("input[name=rate]"),
+// 				orderId = $feedbackWindow.data("order_id"),
+// 				phoneId = $feedbackWindow.data("phone_id"),
+// 				_csrf = $feedbackWindow.find("input[name=_csrf]"),
+// 				rate = $rate.val(),
+// 				msg = $feedbackMsg.val();
+			
+// 			if(rate=="" || msg=="" || !orderId || orderId=="" || !phoneId || phoneId=="") {
+// 				if(rate=="") {
+// 					$rate.parent().find(".warning").addClass("rounded border border-danger");
+// 					$rate.addClass('is-invalid');
+// 				}
+// 				if(msg==""){
+// 					$feedbackMsg.addClass('is-invalid');
+// 				}
+// 			} else  {
+// 				var reqData = {
+// 					"order_id":orderId,
+// 					"phone_id":phoneId,
+// 					"rate":rate,
+// 					"feedback_msg":msg,
+// 					"_csrf": _csrf
+// 				};
+				
+// 				reqData = JSON.stringify(reqData);
+				
+// 				$.ajax({
+// 				    url:"/customer/feedback/save",
+// 				    type:'post',
+// // 				    header:{
+// // 				    	"X-CSRFToken": _csrf,
+// // // 				        "Content-Type": "application/json"
+// // 				    },
+// // 				    contentType: "application/json; charset=utf-8",
+// // 				    crossDomain: true,
+// 				    dataType: "json",
+// // 				    contentType: false,
+// // 				    processData: false,
+// 				    data: reqData,
+// 				    success:function(s){
+// 				        console.log("success", s)
+// 				    }, error:function(e){
+// 				        console.log("error", e)
+// 				    }
+// 				});
+// 			}
+// 			return false;
+// 		});
+	</script>
+</body>
+</html>
